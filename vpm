@@ -1,0 +1,75 @@
+#!/bin/bash
+
+if [ -r "$HOME/.vpmrc" ]; then
+    . $HOME/.vpmrc
+fi
+
+echo Verifying environment:
+set -e
+echo -ne "  openssl:\t\t"
+openssl version
+echo -ne "  ssh:\t\t\t"
+ssh -V
+echo -ne "  vim:\t\t\t"
+vim --version|head -n 1
+echo -ne "  md5sum:\t\t"
+md5sum --version|head -n 1
+set +e
+echo -ne "  ramdisk (optional):\t"
+ls -ld /dev/shm
+
+if [ -z "$VPMSERVER" ]; then
+    echo 
+    read -p "Enter SSH user@host: " VPMSERVER
+    echo "Storing that setting in ~/.vpmrc"
+    echo "VPMSERVER=\"$VPMSERVER\"" >> $HOME/.vpmrc
+fi
+
+echo
+read -p "Enter password: " -s VPMPASS
+echo
+
+export VPMPASS
+
+if [ -d "/dev/shm" -a -w "/dev/shm" ]; then
+    tmpprefix="/dev/shm/"
+fi
+
+tmpfile="`mktemp ${tmpprefix}pwd-XXXXXXXXXX.vpmbf`"
+echo -ne "Fetching passwords database...  "
+ssh -T "$VPMSERVER" vim-password-manager/server-commands/get_db > $tmpfile </dev/null
+if [ "$?" == "0" ]; then
+    echo "done"
+else
+    echo "ERROR: problems fetching passwords database, aborting."
+    rm -f $tmpfile
+    exit 1
+fi
+
+oldsum="`md5sum $tmpfile`"
+vim $tmpfile
+if [ "$?" == "1" ]; then
+    echo "ERROR: Something went wrong with running vim. Wrong password?"
+    rm -f $tmpfile
+    exit 1
+fi
+
+newsum="`md5sum $tmpfile`"
+if [ "$newsum" == "$oldsum" ]; then
+    rm -f $tmpfile
+    exit
+fi
+
+echo -ne "Passwords database modified, uploading new version...  "
+cat $tmpfile | ssh -T "$VPMSERVER" vim-password-manager/server-commands/put_db
+if [ "$?" != "0" ]; then
+    echo "ERROR: something went wrong, your changes most likely didn't get uploaded."
+    rm -f $tmpfile
+    exit 1
+else
+    echo "done"
+fi
+
+
+rm -f $tmpfile
+
