@@ -18,6 +18,11 @@ set +e
 echo -ne "  ramdisk (optional):\t"
 ls -ld /dev/shm
 
+if [ ! -f "$HOME/.vim/plugin/vpm.vim" ]; then
+    mkdir -p $HOME/.vim/plugin
+    ln -s $PWD/vimplugin/vpm.vim $HOME/.vim/plugin
+fi
+
 if [ -z "$VPMSERVER" ]; then
     echo 
     read -p "Enter SSH user@host: " VPMSERVER
