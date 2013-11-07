@@ -106,10 +106,13 @@ autocmd BufWritePre,FileWritePre   *.vpmbf call s:OpenSSLWritePre()
 autocmd BufWritePost,FileWritePost *.vpmbf call s:OpenSSLWritePost()
 
 function! HeadlineDelimiterExpression(lnum)
-    if a:lnum == 1
+    if getline(a:lnum) =~ "^\\s*=[^=].*[^=]=\\s*$"
+        return "0"
+    elseif getline(a:lnum) =~ "^\\s*==.*==\\s*$"
         return ">1"
+    else
+        return "="
     endif
-    return (getline(a:lnum)=~"^\\s*==.*==\\s*$") ? ">1" : "="
 endfunction
 autocmd BufReadPost,FileReadPost   *.vpmbf set foldexpr=HeadlineDelimiterExpression(v:lnum)
 autocmd BufReadPost,FileReadPost   *.vpmbf set foldlevel=0
@@ -118,7 +121,7 @@ autocmd BufReadPost,FileReadPost   *.vpmbf set foldmethod=expr
 autocmd BufReadPost,FileReadPost   *.vpmbf set foldtext=getline(v:foldstart)
 autocmd BufReadPost,FileReadPost   *.vpmbf nnoremap <silent><space> :exe 'silent! normal! za'.(foldlevel('.')?'':'l')<CR>
 autocmd BufReadPost,FileReadPost   *.vpmbf nnoremap <silent>q :q<CR>
-autocmd BufReadPost,FileReadPost   *.vpmbf highlight Folded ctermbg=red ctermfg=black
+autocmd BufReadPost,FileReadPost   *.vpmbf highlight Folded ctermbg=green ctermfg=black
 "autocmd BufReadPost,FileReadPost   *.pmbf set updatetime=300000
 autocmd CursorHold                 *.pmbf quit
 
