@@ -27,6 +27,8 @@ function! s:OpenSSLReadPre()
     set cmdheight=3
     set viminfo=
     set noswapfile
+    set nobackup
+    set nowritebackup
     set shell=/bin/sh
     set bin
 endfunction
