@@ -34,6 +34,11 @@ echo
 read -p "Enter password: " -s VPMPASS
 echo
 
+if [ -z "$VPMPASS" ]; then
+    echo "ERROR: password not provided, aborting."
+    exit 1
+fi
+
 export VPMPASS
 
 if [ -d "/dev/shm" -a -w "/dev/shm" ]; then

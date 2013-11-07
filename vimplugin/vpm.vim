@@ -39,7 +39,11 @@ function! s:OpenSSLReadPost()
 "        let l:cipher = "aes-256-cbc"
 "    endif
     let l:cipher = "bf"
-    let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -d -a -salt"
+    if $VPMPASS =~ "."
+        let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -d -a -salt"
+    else
+        let l:expr = "0,$!openssl " . l:cipher . " -d -a -salt"
+    endif
 
     silent! execute l:expr
     if v:shell_error
@@ -83,7 +87,11 @@ function! s:OpenSSLWritePre()
 "        let l:cipher = "aes-256-cbc"
 "    endif
     let l:cipher = "bf"
-    let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -e -a -salt"
+    if $VPMPASS =~ "."
+        let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -e -a -salt"
+    else
+        let l:expr = "0,$!openssl " . l:cipher . " -e -a -salt"
+    endif
 
     silent! execute l:expr
     if v:shell_error
