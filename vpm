@@ -64,7 +64,7 @@ if [ "$?" == "1" ]; then
     exit 1
 fi
 
-newsum="`md5sum $tmpfile`|awk '{print \$1}'"
+newsum="`md5sum $tmpfile|awk '{print \$1}'`"
 if [ "$newsum" == "$oldsum" ]; then
     rm -f $tmpfile
     exit
