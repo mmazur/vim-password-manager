@@ -1,0 +1,30 @@
+#!/bin/bash
+
+umask 0077
+
+# WARNING: this is a shell script, so it's most likely NOT secure
+cmd="`echo $SSH_ORIGINAL_COMMAND|awk '{print \$1}'`"
+arg1="`echo $SSH_ORIGINAL_COMMAND|awk '{print \$2}'`"
+
+client_ip="`echo $SSH_CLIENT|cut '-d ' -f 1`"
+logger -t vpm-server "cmd '$cmd' from $client_ip"
+
+case "$cmd" in
+	"get_db")
+		cat "$HOME/pwddb.vpm"
+		;;
+	"put_db")
+		# No locking, possible race issues
+		newfile="$HOME/pwddb.vpm.new.$$"
+		cat > "$newfile"
+		newmd5=`md5sum "$newfile"|awk '{print $1}'`
+		if [ ! -s "$HOME/pwddb.vpm.new.$$" -o "$newmd5" != "$arg1" ]; then
+			echo "File transmission error, changes NOT applied, aborting." >&2
+			exit 1
+		fi
+		mv "$newfile" "$HOME/pwddb.vpm"
+		;;
+	*)
+		exit 1
+		;;
+esac
