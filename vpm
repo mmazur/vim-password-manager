@@ -47,7 +47,7 @@ fi
 
 tmpfile="`mktemp ${tmpprefix}pwd-XXXXXXXXXX.vpmbf`"
 echo -ne "Fetching passwords database...  "
-ssh -T "$VPMSERVER" vim-password-manager/server-commands/get_db > $tmpfile </dev/null
+ssh -T "$VPMSERVER" get_db > $tmpfile </dev/null
 if [ "$?" == "0" ]; then
     echo "done"
 else
@@ -56,7 +56,7 @@ else
     exit 1
 fi
 
-oldsum="`md5sum $tmpfile`"
+oldsum="`md5sum $tmpfile|awk '{print \$1}'`"
 vim $tmpfile
 if [ "$?" == "1" ]; then
     echo "ERROR: Something went wrong with running vim. Wrong password?"
@@ -64,14 +64,14 @@ if [ "$?" == "1" ]; then
     exit 1
 fi
 
-newsum="`md5sum $tmpfile`"
+newsum="`md5sum $tmpfile`|awk '{print \$1}'"
 if [ "$newsum" == "$oldsum" ]; then
     rm -f $tmpfile
     exit
 fi
 
 echo -ne "Passwords database modified, uploading new version...  "
-cat $tmpfile | ssh -T "$VPMSERVER" vim-password-manager/server-commands/put_db
+cat $tmpfile | ssh -T "$VPMSERVER" put_db $newsum
 if [ "$?" != "0" ]; then
     echo "ERROR: something went wrong, your changes most likely didn't get uploaded."
     rm -f $tmpfile
