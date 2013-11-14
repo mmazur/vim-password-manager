@@ -56,7 +56,8 @@ else
     exit 1
 fi
 
-oldsum="`md5sum $tmpfile|awk '{print \$1}'`"
+oldsum="`md5sum $tmpfile`"
+oldsum=${oldsum:0:32}
 vim $tmpfile
 if [ "$?" == "1" ]; then
     echo "ERROR: Something went wrong with running vim. Wrong password?"
@@ -64,7 +65,8 @@ if [ "$?" == "1" ]; then
     exit 1
 fi
 
-newsum="`md5sum $tmpfile|awk '{print \$1}'`"
+newsum="`md5sum $tmpfile`"
+newsum=${newsum:0:32}
 if [ "$newsum" == "$oldsum" ]; then
     rm -f $tmpfile
     exit
