@@ -40,9 +40,9 @@ function! s:OpenSSLReadPost()
 "    endif
     let l:cipher = "bf"
     if $VPMPASS =~ "."
-        let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -d -a -salt"
+        let l:expr = "0,$!openssl " . l:cipher . " -md md5 -pass env:VPMPASS -d -a -salt"
     else
-        let l:expr = "0,$!openssl " . l:cipher . " -d -a -salt"
+        let l:expr = "0,$!openssl " . l:cipher . " -md md5 -d -a -salt"
     endif
 
     silent! execute l:expr
@@ -88,9 +88,9 @@ function! s:OpenSSLWritePre()
 "    endif
     let l:cipher = "bf"
     if $VPMPASS =~ "."
-        let l:expr = "0,$!openssl " . l:cipher . " -pass env:VPMPASS -e -a -salt"
+        let l:expr = "0,$!openssl " . l:cipher . " -md md5 -pass env:VPMPASS -e -a -salt"
     else
-        let l:expr = "0,$!openssl " . l:cipher . " -e -a -salt"
+        let l:expr = "0,$!openssl " . l:cipher . " -md md5 -e -a -salt"
     endif
 
     silent! execute l:expr
